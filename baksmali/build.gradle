@@ -1,6 +1,5 @@
 /*
- * Copyright 2012, Google Inc.
- * All rights reserved.
+ * Copyright 2012, Google LLC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -12,7 +11,7 @@
  * copyright notice, this list of conditions and the following disclaimer
  * in the documentation and/or other materials provided with the
  * distribution.
- *     * Neither the name of Google Inc. nor the names of its
+ *     * Neither the name of Google LLC nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -38,6 +37,14 @@ buildscript {
     }
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs "${project.rootDir}/third_party/baksmali/src/main/java"
+        }
+    }
+}
+
 dependencies {
     implementation project(':util')
     api project(':dexlib2')
@@ -54,13 +61,16 @@ processResources.expand('version': version)
 
 // Build a separate jar that contains all dependencies
 task fatJar(type: Jar) {
+    dependsOn ':dexlib2:jar'
+    dependsOn ':util:jar'
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
-    classifier = 'fat'
+    duplicatesStrategy = 'exclude'
+    archiveClassifier = 'fat'
 
     manifest {
-        attributes('Main-Class': 'org.jf.baksmali.Main')
+        attributes('Main-Class': 'com.android.tools.smali.baksmali.Main')
     }
 
     doLast {
@@ -78,7 +88,7 @@ publish {
                 pom {
                     description = 'baksmali is a disassembler for dalvik bytecode'
                     scm {
-                        url = 'https://github.com/JesusFreke/smali/tree/master/baksmali'
+                        url = 'https://github.com/google/smali/tree/master/baksmali'
                     }
                 }
             }
@@ -102,8 +112,8 @@ task proguard(type: proguard.gradle.ProGuardTask, dependsOn: fatJar) {
     dontobfuscate
     dontoptimize
 
-    keep 'public class org.jf.baksmali.Main { public static void main(java.lang.String[]); }'
-    keep 'public class org.jf.util.jcommander.ColonParameterSplitter'
+    keep 'public class com.android.tools.smali.baksmali.Main { public static void main(java.lang.String[]); }'
+    keep 'public class com.android.tools.smali.util.jcommander.ColonParameterSplitter'
     keep 'class com.beust.jcommander.** { *; }'
     keepclassmembers 'enum * { public static **[] values(); public static ** valueOf(java.lang.String); }'
 

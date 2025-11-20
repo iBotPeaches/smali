@@ -1,6 +1,5 @@
 /*
- * Copyright 2012, Google Inc.
- * All rights reserved.
+ * Copyright 2012, Google LLC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -12,7 +11,7 @@
  * copyright notice, this list of conditions and the following disclaimer
  * in the documentation and/or other materials provided with the
  * distribution.
- *     * Neither the name of Google Inc. nor the names of its
+ *     * Neither the name of Google LLC nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -31,7 +30,7 @@
 
 apply plugin: 'idea'
 
-version = '2.5.2'
+version = '3.0.9'
 def jcommanderVersion = ''
 
 if (!('release' in gradle.startParameter.taskNames)) {
@@ -90,17 +89,23 @@ subprojects {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    jar {
+        from(project.rootDir) {
+            include 'LICENSE'
+        }
+    }
+
     ext {
         depends = [
-                guava: 'com.google.guava:guava:27.1-android',
+                guava: 'com.google.guava:guava:31.1-android',
                 findbugs: 'com.google.code.findbugs:jsr305:1.3.9',
                 junit: 'junit:junit:4.12',
-                mockito: 'org.mockito:mockito-core:1.10.19',
+                mockito: 'org.mockito:mockito-core:5.12.0',
                 antlr_runtime: 'org.antlr:antlr-runtime:3.5.2',
                 antlr: 'org.antlr:antlr:3.5.2',
                 stringtemplate: 'org.antlr:stringtemplate:3.2.1',
                 jflex_plugin: 'org.xbib.gradle.plugin:gradle-plugin-jflex:1.1.0',
-                proguard_gradle: 'net.sf.proguard:proguard-gradle:6.2.2',
+                proguard_gradle: 'com.guardsquare:proguard-gradle:7.1.0',
                 dx: 'com.google.android.tools:dx:1.7',
                 gson: 'com.google.code.gson:gson:2.3.1',
                 jcommander: jcommanderVersion
@@ -115,12 +120,16 @@ subprojects {
         apply plugin: 'maven-publish'
         apply plugin: 'signing'
 
-        group = 'org.smali'
+        group = 'com.android.tools.smali'
+        def artifact = project.name
+        if (artifact != 'smali') {
+            artifact = 'smali-' + artifact
+        }
 
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    artifactId = project.name
+                    artifactId = artifact
                     from components.java
                     versionMapping {
                         usage('java-api') {
@@ -133,7 +142,7 @@ subprojects {
 
                     pom {
                         name = project.name
-                        url = 'http://smali.org'
+                        url = 'https://github.com/google/smali'
 
                         licenses {
                             license {
@@ -143,14 +152,17 @@ subprojects {
                             }
                         }
                         scm {
-                            connection = 'scm:git:git://github.com/JesusFreke/smali.git'
-                            developerConnection = 'scm:git:git@github.com:JesusFreke/smali.git'
+                            connection = 'scm:git:git://github.com/google/smali.git'
+                            developerConnection = 'scm:git:git@github.com:google/smali.git'
                         }
                         developers {
                             developer {
                                 id = 'jesusfreke'
                                 name = 'Ben Gruver'
                                 email = 'jesusfreke@jesusfreke.com'
+                            }
+                            developer {
+                                name = 'The Android Open Source Project'
                             }
                         }
                     }
@@ -188,11 +200,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
+        classpath 'org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r'
     }
 }
 
 wrapper {
-    gradleVersion = '6.8.2'
+    gradleVersion = '8.5'
     distributionType = Wrapper.DistributionType.ALL
 }
